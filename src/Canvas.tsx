@@ -1,66 +1,46 @@
-import React, { useEffect, useRef } from "react";
-import styled from "styled-components";
-import { Pixel } from "./types";
+import React from "react"
+import styled from "styled-components"
 
 type Props = {
-  pixels: Pixel[]
-  setPixels: React.Dispatch<React.SetStateAction<Pixel[]>>
+  canvasRef: React.RefObject<HTMLCanvasElement>
   width: number
   height: number
   scale: number
 }
 
 const Canvas = React.memo(function Canvas({
-  pixels,
-  setPixels,
+  canvasRef,
   width,
   height,
   scale
 }: Props) {
-  const canvasRef = useRef<HTMLCanvasElement>(null)
+  const handleMouseMove = (e: React.MouseEvent<HTMLCanvasElement, MouseEvent>) => {
+    if(e.buttons !== 1 || !canvasRef.current) return
 
-  useEffect(() => {
-    if(!canvasRef.current) return
     const context = canvasRef.current.getContext('2d')
     if(!context) return
 
-    context.fillStyle = '#ffffff'
-    context.fillRect(0, 0, context.canvas.width, context.canvas.height)
+    context.lineCap = 'round'
+    context.beginPath()
+    context.moveTo(e.nativeEvent.offsetX - e.nativeEvent.movementX, e.nativeEvent.offsetY - e.nativeEvent.movementY)
+    context.lineTo(e.nativeEvent.offsetX, e.nativeEvent.offsetY)
+    context.closePath()
+    context.lineWidth = 16
+    context.strokeStyle = `#000`
+    context.stroke()
 
-    pixels.forEach(({x, y, value}) => {
-      const rgb = value * 255
-      context.fillStyle = `rgba(${rgb}, ${rgb}, ${rgb}, 1.0)`
-      context.fillRect(x * scale, y * scale, scale, scale)
-    })
-  }, [canvasRef.current, pixels, scale])
+    const x = e.nativeEvent.offsetX
+    const y = e.nativeEvent.offsetY
 
-  const handleClick = (e: React.MouseEvent<HTMLCanvasElement, MouseEvent>) => {
-    if(e.buttons != 1) return
-
-    const mouseSpeed = Math.sqrt(e.movementX * e.movementX + e.movementY * e.movementY)
-
-    const x = Math.floor(e.nativeEvent.offsetX / scale)
-    const y = Math.floor(e.nativeEvent.offsetY / scale)
-    setPixels(prev => prev.map(pixel => {
-      if(pixel.x === x && pixel.y === y) {
-        return {
-          ...pixel,
-          value: 0.0
-        }
-      } else if(Math.abs(pixel.x - x) <= 1 && Math.abs(pixel.y - y) <= 1) {
-        return {
-          ...pixel,
-          value: Math.max(pixel.value - mouseSpeed / 40, 0)
-        }
-      } else if(Math.abs(pixel.x - x) <= 2 && Math.abs(pixel.y - y) <= 2) {
-        return {
-          ...pixel,
-          value: Math.max(pixel.value - mouseSpeed / 400, 0)
-        }
-      } else {
-        return pixel
-      }
-    }))
+    const gradient = context.createRadialGradient(x, y, 8, x, y, 20)
+    gradient.addColorStop(0, "rgba(0, 0, 0, 1)")
+    gradient.addColorStop(0.5, "rgba(0, 0, 0, 0.3)")
+    gradient.addColorStop(1, "rgba(0, 0, 0, 0)")
+    context.beginPath()
+    context.arc(x, y, 20, 0, 2 * Math.PI)
+    context.closePath()
+    context.fillStyle = gradient
+    context.fill()
   }
 
   return (
@@ -68,7 +48,7 @@ const Canvas = React.memo(function Canvas({
       ref={canvasRef}
       height={height * scale}
       width={width * scale}
-      onMouseMove={handleClick}
+      onMouseMove={handleMouseMove}
     />
   )
 })
