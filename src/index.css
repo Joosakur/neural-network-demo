@@ -5,6 +5,16 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+
+  background-color: #eaeaee;
+  font-family: 'Roboto Mono', monospace;
+  font-size: 15px;
+}
+
+h1 {
+  font-family: 'Architects Daughter', cursive;
+  font-size: 36px;
+  margin-bottom: 16px;
 }
 
 code {

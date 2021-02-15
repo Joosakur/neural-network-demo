@@ -70,7 +70,11 @@ const Canvas = React.memo(function Canvas({
 
 const StyledCanvas = styled.canvas`
   border: 1px solid black;
+  border-radius: 4px;
   touch-action: none;
+  margin: 16px 8px;
+  background-color: white;
+  cursor: crosshair;
 `
 
 export default Canvas

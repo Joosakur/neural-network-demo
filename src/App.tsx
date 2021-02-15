@@ -42,12 +42,12 @@ function App() {
 
     setText("")
     if(result[0].confidence > 0.93) {
-      setText(`I feel certain that it is number ${result[0].value}.`)
+      setText(`That certainly must be ${result[0].value}.`)
     } else if(result[0].confidence > 0.8) {
-      setText(`I feel quite confident that is number ${result[0].value}.`)
-    } else if(result[0].confidence > 0.5) {
+      setText(`I feel quite confident that it is ${result[0].value}.`)
+    } else if(result[0].confidence > 0.55) {
       setText(`Uhm.. is it ${result[0].value}?`)
-    } else if(result[0].confidence > 0.4) {
+    } else if(result[0].confidence > 0.45) {
       setText(`If I really had to guess.. I would say it might be ${result[0].value}.`)
     } else {
       setText(`Sorry, I have no idea what that is.`)
@@ -91,11 +91,15 @@ function App() {
           setText("")
         }}>Clear</StyledButton>
 
-        <StyledButton onClick={onEvaluate}>Test</StyledButton>
+        <StyledButton onClick={onEvaluate}>Ready!</StyledButton>
       </ButtonRow>
 
-      { text && <p>{text}</p> }
+      { text && <Answer>{text}</Answer> }
 
+      <Footer>
+        <div>Created by <a href='https://www.linkedin.com/in/joosa-kurvinen/'>Joosa Kurvinen</a></div>
+        <div>Feel the Force, Read the <a href='https://github.com/Joosakur/neural-network-test'>Source</a></div>
+      </Footer>
     </Container>
   )
 }
@@ -104,18 +108,77 @@ const Container = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
+  padding: 0 12px;
+  text-align: center;
+
+  @media (min-height: 700px) {
+    padding-top: 32px;
+  }
 `
 
 const ButtonRow = styled.div`
-  margin-top: 16px;
+  margin-bottom: 16px;
   width: 280px;
   display: flex;
-  justify-content: space-evenly;
+  justify-content: space-between;
+  user-select: none;
+  
+  @media (min-height: 700px) {
+    margin-top: 16px;
+    margin-bottom: 32px;
+  }
 `
 
 const StyledButton = styled.button`
-  width: 80px;
+  width: 120px;
   height: 38px;
+
+  color: white;
+  font-size: 18px;
+  font-weight: 400;
+  font-family: 'Roboto Mono', monospace;
+  
+  border: none;
+  background-color: #2c5cac;
+  border-radius: 4px;
+
+  &:hover {
+    background-color: #3e71c6;
+  }
+
+  &:active {
+    background-color: #1f4280;
+  }
+`
+
+const Answer = styled.div`
+  max-width: 280px;
+  background-color: white;
+  border-radius: 20px;
+  border: 1px solid #2d2d2d;
+  padding: 12px 16px;
+  box-shadow: 2px 4px 6px 1px rgba(0, 0, 0, 0.3);
+`
+
+const Footer = styled.footer`
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 8px;
+  background-color: #353535;
+  color: #c8c8cf;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-evenly;
+  align-items: center;
+  font-weight: 500;
+  font-size: 14px;
+  overflow: hidden;
+
+  a {
+    color: #7ca8d7;
+  }
 `
 
 const initPixels = () => {
