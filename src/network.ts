@@ -10,18 +10,18 @@ const activationFunctions: Record<ActivationFunctionType, ActivationFunction> = 
   NONE: x => x
 }
 
-type NodeJson = {
+type NeuronJson = {
   bias: number
   activationFunction: ActivationFunctionType
   inputs: {
     fromLayer: number
-    fromNode: number
+    fromNeuron: number
     weight: number
   }[]
 }
 
 type LayerJson = {
-  nodes: NodeJson[]
+  neurons: NeuronJson[]
 }
 
 type NetworkJson = {
@@ -29,19 +29,19 @@ type NetworkJson = {
   otherLayers: LayerJson[]
 }
 
-type Node = {
+type Neuron = {
   activation: number
   bias: number
   activationFunction: ActivationFunctionType
   inputs: {
     fromLayer: number
-    fromNode: number
+    fromNeuron: number
     weight: number
   }[]
 }
 
 type Layer = {
-  nodes: Node[]
+  neurons: Neuron[]
 }
 
 type Network = {
@@ -49,13 +49,14 @@ type Network = {
 }
 
 export function importNetworkFromJson(): Network {
+  // @ts-ignore
   const network = data as NetworkJson
 
   const inputLayer: Layer = {
-    nodes: []
+    neurons: []
   }
   for (let i = 0; i < network.inputLayerLength; i++) {
-    inputLayer.nodes.push({
+    inputLayer.neurons.push({
       activation: 0,
       bias: 0,
       activationFunction: 'NONE',
@@ -67,13 +68,13 @@ export function importNetworkFromJson(): Network {
     layers: [
       inputLayer,
       ...(network.otherLayers.map((layer, layerNumber) => ({
-        nodes: layer.nodes.map(node => ({
+        neurons: layer.neurons.map(neuron => ({
           activation: 0,
-          bias: node.bias,
-          activationFunction: node.activationFunction,
-          inputs: node.inputs.map(input => ({
+          bias: neuron.bias,
+          activationFunction: neuron.activationFunction,
+          inputs: neuron.inputs.map(input => ({
             fromLayer: input.fromLayer,
-            fromNode: input.fromNode,
+            fromNeuron: input.fromNeuron,
             weight: input.weight
           }))
         }))
@@ -92,25 +93,25 @@ export function evaluate(network: Network, input: number[]): Guess[] {
     throw new Error("Invalid network")
   }
 
-  if(input.length !== network.layers[0].nodes.length) {
+  if(input.length !== network.layers[0].neurons.length) {
     throw new Error("Invalid input length")
   }
 
-  network.layers[0].nodes.forEach((node, i) => node.activation = input[i])
+  network.layers[0].neurons.forEach((neuron, i) => neuron.activation = input[i])
 
   for (let i = 1; i < network.layers.length; i++){
-    for (let n = 0; n < network.layers[i].nodes.length; n++){
-      const node = network.layers[i].nodes[n]
-      const weightedSum = node.inputs.reduce((sum, input) => {
-        const inputNode = network.layers[input.fromLayer].nodes[input.fromNode]
-        return sum + input.weight * inputNode.activation
-      }, node.bias)
-      node.activation = activationFunctions[node.activationFunction](weightedSum)
+    for (let n = 0; n < network.layers[i].neurons.length; n++){
+      const neuron = network.layers[i].neurons[n]
+      const weightedSum = neuron.inputs.reduce((sum, input) => {
+        const inputNeuron = network.layers[input.fromLayer].neurons[input.fromNeuron]
+        return sum + input.weight * inputNeuron.activation
+      }, neuron.bias)
+      neuron.activation = activationFunctions[neuron.activationFunction](weightedSum)
     }
   }
 
-  const outputActivations = network.layers[network.layers.length - 1].nodes
-    .map(node => node.activation)
+  const outputActivations = network.layers[network.layers.length - 1].neurons
+    .map(neuron => neuron.activation)
 
   const outputActivationSum = outputActivations.reduce((sum, a) => sum + a, 0)
 
